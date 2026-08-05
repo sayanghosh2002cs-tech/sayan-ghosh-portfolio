@@ -130,7 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
      Update these two hrefs with the real profile link before publishing. */
   const linkedinTargets = [
     document.getElementById('linkedinLink'),
-    document.getElementById('linkedinLinkFooter')
+    document.getElementById('linkedinLinkFooter'),
+    document.getElementById('linkedinLinkHero')
   ];
   const LINKEDIN_URL = 'https://www.linkedin.com/in/sayan-ghosh-59ab76276'; // real profile URL
 
