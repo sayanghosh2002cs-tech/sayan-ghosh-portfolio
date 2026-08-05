@@ -125,6 +125,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* ---------------- Animated stat counters ---------------- */
+  const statEls = document.querySelectorAll('.stat-num');
+  const animateStat = (el) => {
+    const target = parseFloat(el.dataset.target);
+    const isDecimal = el.dataset.decimal === 'true';
+    const suffix = el.dataset.suffix || '';
+    const duration = 1400;
+    const start = performance.now();
+
+    const step = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const value = target * eased;
+      el.textContent = (isDecimal ? value.toFixed(2) : Math.round(value)) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  if (statEls.length && !prefersReducedMotionCheck()) {
+    const statObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateStat(entry.target);
+          statObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    statEls.forEach(el => statObserver.observe(el));
+  } else {
+    statEls.forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      const isDecimal = el.dataset.decimal === 'true';
+      const suffix = el.dataset.suffix || '';
+      el.textContent = (isDecimal ? target.toFixed(2) : target) + suffix;
+    });
+  }
+
+  function prefersReducedMotionCheck() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /* ---------------- Subtle hero photo tilt on mouse move ---------------- */
+  const photoRing = document.querySelector('.hero-photo-ring');
+  const photoCol = document.querySelector('.hero-photo-col');
+  if (photoRing && photoCol && window.matchMedia('(hover: hover) and (min-width: 900px)').matches) {
+    photoCol.addEventListener('mousemove', (e) => {
+      const rect = photoCol.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      photoRing.style.transform = `rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`;
+    });
+    photoCol.addEventListener('mouseleave', () => {
+      photoRing.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+  }
+
   /* ---------------- LinkedIn placeholder guard ----------------
      Resume text only said "LinkedIn" with no URL attached.
      Update these two hrefs with the real profile link before publishing. */
